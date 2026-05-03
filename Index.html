@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ignited Plastics: Remnant Watch Mobile</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; font-family: Arial, sans-serif; user-select: none; }
+        canvas { display: block; }
+
+        /* Capa de Interfaz Táctica */
+        .touch-btn {
+            position: absolute; background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff; color: white; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; pointer-events: auto; touch-action: manipulation;
+        }
+
+        /* Botones de acción */
+        #btn-door { bottom: 20px; right: 20px; width: 80px; height: 80px; background: rgba(200, 0, 0, 0.4); }
+        #btn-mask { bottom: 20px; left: 20px; width: 80px; height: 80px; background: rgba(0, 0, 200, 0.4); }
+        #btn-light { bottom: 120px; left: 20px; width: 80px; height: 80px; }
+        #btn-monitor { bottom: 20px; left: 50%; transform: translateX(-50%); width: 120px; height: 60px; background: #444; }
+
+        /* Panel de Cámaras */
+        #cam-panel {
+            position: absolute; top: 10px; right: 10px; display: none;
+            grid-template-columns: repeat(2, 60px); gap: 5px;
+        }
+        .cam-btn { width: 60px; height: 40px; background: #222; color: white; font-size: 10px; border: 1px solid #777; }
+
+        /* Especial Chica en Cam 3 */
+        #btn-cook { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    padding: 20px; background: gold; color: black; display: none; }
+
+        #mask-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                        background: radial-gradient(circle, transparent 20%, black 150%);
+                        border: 50px solid rgba(50,30,30,0.9); display: none; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="mask-overlay"></div>
+
+    <!-- Botones Principales -->
+    <div id="btn-door" class="touch-btn" onclick="toggleDoor()">PUERTA</div>
+    <div id="btn-mask" class="touch-btn" onclick="toggleMask()">MÁSCARA</div>
+    <div id="btn-light" class="touch-btn" onpointerdown="startFlash()" onpointerup="stopFlash()">LUZ</div>
+    <div id="btn-monitor" class="touch-btn" onclick="toggleMonitor()">CAMS</div>
+
+    <!-- Panel de 8 Cámaras -->
+    <div id="cam-panel">
+        <button class="cam-btn" onclick="changeCam(1)">CAM 1</button>
+        <button class="cam-btn" onclick="changeCam(2)">CAM 2</button>
+        <button class="cam-btn" onclick="changeCam(3, true)">CAM 3</button>
+        <button class="cam-btn" onclick="changeCam(4)">CAM 4</button>
+        <button class="cam-btn" onclick="changeCam(5)">CAM 5</button>
+        <button class="cam-btn" onclick="changeCam(6)">CAM 6</button>
+        <button class="cam-btn" onclick="changeCam(7)">CAM 7</button>
+        <button class="cam-btn" onclick="changeCam(8)">CAM 8</button>
+    </div>
+
+    <button id="btn-cook" onclick="cookPizza()">COOK PIZZA!</button>
+
+    <script src="https://cloudflare.com"></script>
+
+    <script>
+        let scene, camera, renderer, light;
+        let isMonitorOpen = false, isMaskOn = false, foxyTimer = 0;
+        
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Luz ambiente para la oficina
+            light = new THREE.PointLight(0xffffff, 0.5, 100);
+            light.position.set(0, 2, 2);
+            scene.add(light);
+
+            camera.position.set(0, 1.6, 0);
+            animate();
+        }
+
+        // Lógica de Puerta (Freddy)
+        function toggleDoor() {
+            console.log("Puerta Derecha accionada");
+            // Aquí moverías el objeto 3D de la puerta
+        }
+
+        // Lógica de Máscara (Bonnie)
+        function toggleMask() {
+            isMaskOn = !isMaskOn;
+            document.getElementById('mask-overlay').style.display = isMaskOn ? 'block' : 'none';
+        }
+
+        // Lógica de Linterna (Foxy)
+        function startFlash() { light.intensity = 2; }
+        function stopFlash() { light.intensity = 0.5; }
+
+        // Sistema de Cámaras
+        function toggleMonitor() {
+            isMonitorOpen = !isMonitorOpen;
+            document.getElementById('cam-panel').style.display = isMonitorOpen ? 'grid' : 'none';
+            if(!isMonitorOpen) document.getElementById('btn-cook').style.display = 'none';
+            // Golden Freddy Check
+            if(isMonitorOpen) checkGoldenFreddy();
+        }
+
+        function changeCam(num, isKitchen = false) {
+            console.log("Cambiando a Cámara " + num);
+            document.getElementById('btn-cook').style.display = isKitchen ? 'block' : 'none';
+        }
+
+        function cookPizza() {
+            let audio = new Audio('https://myinstants.com'); // Link de ejemplo
+            audio.play();
+            alert("Chica: Pizza, Pizza?, Pizza!");
+            document.getElementById('btn-cook').style.display = 'none';
+        }
+
+        function checkGoldenFreddy() {
+            // Lógica: Si GF está en oficina y cierras monitor, se va.
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // Movimiento suave de cámara para simular respiración
+            camera.position.y = 1.6 + Math.sin(Date.now() * 0.002) * 0.02;
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        init();
+    </script>
+</body>
+</html>
